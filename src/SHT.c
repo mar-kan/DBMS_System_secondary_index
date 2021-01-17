@@ -6,15 +6,15 @@ int SHT_CreateSecondaryIndex(char *sfileName, /* όνομααρχείου */char
     int fd;
     void* block = NULL;
     int blkCnt = 0;
-    char hash_id = 'T';
+    char shash_id = 'S';
 
     //creates and opens new block file
-    if (BF_CreateFile(fileName) < 0)
+    if (BF_CreateFile(sfileName) < 0)
     {
         BF_PrintError("Error creating BF file");
         return -1;
     }
-    if ((fd = BF_OpenFile(fileName)) < 0)
+    if ((fd = BF_OpenFile(sfileName)) < 0)
     {
         BF_PrintError("Error opening BF file");
         return -1;
@@ -33,9 +33,12 @@ int SHT_CreateSecondaryIndex(char *sfileName, /* όνομααρχείου */char
         return -1;
     }
 
-    //writes heap id to block and number of max buckets of file
-    memcpy(block,&hash_id,sizeof(char));
+    int filename_size = sizeof(fileName);
+    //writes secondary hash id to block, number of max buckets of file, sizeof(filename), filename
+    memcpy(block,&shash_id,sizeof(char));
     memcpy(block+sizeof(char), &buckets, sizeof(int));
+    memcpy(block+sizeof(char)+sizeof(int), &filename_size, sizeof(int));
+    memcpy(block+sizeof(char)+sizeof(int)*2, fileName, filename_size);
 
     if (BF_WriteBlock(fd, blkCnt) < 0)
     {
@@ -55,9 +58,9 @@ int SHT_CreateSecondaryIndex(char *sfileName, /* όνομααρχείου */char
 
 SHT_info * SHT_OpenSecondaryIndex(char *sfileName /* όνομα αρχείου */ )
 {
-    /*int fd;
+    int fd;
     void * block;
-    if ((fd = BF_OpenFile(fileName)) < 0)
+    if ((fd = BF_OpenFile(sfileName)) < 0)
     {
         BF_PrintError("Error opening block file");
         return NULL;
@@ -74,24 +77,32 @@ SHT_info * SHT_OpenSecondaryIndex(char *sfileName /* όνομα αρχείου *
     char file_id;
     memcpy (&file_id, block, sizeof(char));
 
+    //checks if opened file is SHT file
+    if (file_id != 'S')
+    {
+        printf("File is not an SHT file\n");
+        return NULL;
+    }
+
     //gets num of buckets of file
     int buckets;
     memcpy (&buckets, block+sizeof(char), sizeof(int));
 
-    //checks if opened file is hash file
-    if (file_id != 'T')
-    {
-        printf("File is not a heap file\n");
-        return NULL;
-    }
+    //gets ht filename
+    int filename_size;
+    memcpy(&filename_size, block+sizeof(char)+sizeof(int), sizeof(int));
+    char * filename = (char*)malloc(filename_size);
+    memcpy(filename, block+sizeof(char)+sizeof(int)*2, filename_size);
+
 
     //creates file's HT_info
-    HT_info * info = malloc(sizeof(HT_info));
+    SHT_info * info = malloc(sizeof(SHT_info));
+    info->attrName = (char*)malloc(sizeof(sfileName));
     info->fileDesc = fd;
-    info->attrName = fileName;
-    info->attrType = 'c';
-    info->attrLength = sizeof (fileName);
+    info->attrName = sfileName;
+    info->attrLength = sizeof (sfileName);
     info->numBuckets = buckets;   //keeps max num of buckets of file
+    info->fileName = filename;
 
     //closes file
     if (BF_CloseFile(fd) < 0)
@@ -100,14 +111,14 @@ SHT_info * SHT_OpenSecondaryIndex(char *sfileName /* όνομα αρχείου *
         return NULL;
     }
 
-    return info;*/
-    return NULL;
+    free(filename);
+    return info;
 }
 
 
 int SHT_CloseSecondaryIndex(SHT_info* header_info)
 {
-    /*if ((BF_OpenFile(header_info->attrName)) < 0)
+    if ((BF_OpenFile(header_info->attrName)) < 0)
     {
         BF_PrintError("Error opening block file");
         return -1;
@@ -119,15 +130,16 @@ int SHT_CloseSecondaryIndex(SHT_info* header_info)
         return -1;
     }
 
-    //frees HT_info memory
-    free(header_info);*/
+    //frees SHT_info memory
+    free(header_info->fileName);
+    free(header_info);
     return 0;
 }
 
 
 int SHT_SecondaryInsertEntry(SHT_info header_info, /* επικεφαλίδα του αρχείου*/ SecondaryRecord record /* δομή πουπροσδιορίζει την εγγραφή */)
 {
-    /*void* block = NULL;
+    void* block = NULL;
     int blkCnt;
     int recordNum = 0;
     int block_hash_num = 0;
@@ -151,7 +163,7 @@ int SHT_SecondaryInsertEntry(SHT_info header_info, /* επικεφαλίδα τ�
     memcpy(&max_buckets, block+sizeof(char), sizeof(int));
 
     //calculates hash value of new entry's key
-    long hash_value = SHT_HashFunction(record.id, max_buckets);
+    long hash_value = SHT_HashFunction(record.record.surname, max_buckets);
 
     //gets last block
     if((blkCnt = BF_GetBlockCounter(header_info.fileDesc)) < 0)
@@ -274,14 +286,12 @@ int SHT_SecondaryInsertEntry(SHT_info header_info, /* επικεφαλίδα τ�
         return -1;
     }
     return i;   //returns block where record was inserted
-     */
-    return 0;
 }
 
 
 int SHT_SecondaryGetAllEntries(SHT_info header_info_sht, /* επικεφαλίδα του αρχείου δευτερεύοντος ευρετηρίου*/ HT_info header_info_ht,/*επικεφαλίδατουαρχείουπρωτεύοντοςευρετηρίου*/ void *value /* τιμή τουπεδίου-κλειδιού προς αναζήτηση */)         //searches for a record with id = key. if found prints it
 {
-   /* void* block = NULL;
+    void* block = NULL;
     int blkCnt;
     int recordNum = 0;
     int hash_value;
@@ -289,17 +299,17 @@ int SHT_SecondaryGetAllEntries(SHT_info header_info_sht, /* επικεφαλίδ
     int flag = 0;
 
     //opens requested file
-    if ((BF_OpenFile(header_info.attrName)) < 0)
+    if ((BF_OpenFile(header_info_sht.attrName)) < 0)
     {
         BF_PrintError("Error opening block file");
         return -1;
     }
 
     //calculates value's hash value
-    long hash_num = SHT_HashFunction(atoi((char*)value), header_info.numBuckets);
+    long hash_num = SHT_HashFunction(value, header_info_sht.numBuckets);
 
     //gets block count
-    if((blkCnt = BF_GetBlockCounter(header_info.fileDesc)) < 0)
+    if((blkCnt = BF_GetBlockCounter(header_info_sht.fileDesc)) < 0)
     {
         BF_PrintError("Error getting block counter");
         return -1;
@@ -309,7 +319,7 @@ int SHT_SecondaryGetAllEntries(SHT_info header_info_sht, /* επικεφαλίδ
     for (i=0; i<blkCnt; i++)
     {
         //reads each block
-        if (BF_ReadBlock(header_info.fileDesc, i, &block) < 0)
+        if (BF_ReadBlock(header_info_sht.fileDesc, i, &block) < 0)
         {
             BF_PrintError("Error in reading block");
             return -1;
@@ -322,7 +332,7 @@ int SHT_SecondaryGetAllEntries(SHT_info header_info_sht, /* επικεφαλίδ
             memcpy (&file_id, block, sizeof(char));
 
             //checks if opened file is hash file
-            if (file_id != 'T')
+            if (file_id != 'S')
             {
                 printf("File is not a hash file\n");
                 return -1;
@@ -353,9 +363,10 @@ int SHT_SecondaryGetAllEntries(SHT_info header_info_sht, /* επικεφαλίδ
             if (strcmp(id, (char*)value) == 0)  //record found
             {
                 //prints record
-                printf("Found Record with key: %d\n"
+                printf("Found Record with secondary key: %s\n"
+                       "ID: %d\n"
                        "Full name: %s %s\n"
-                       "Address: %s\n", rec->id, rec->name, rec->surname, rec->address);
+                       "Address: %s\n", (char*)value, rec->id, rec->name, rec->surname, rec->address);
 
                 flag = 1;
             }
@@ -363,27 +374,28 @@ int SHT_SecondaryGetAllEntries(SHT_info header_info_sht, /* επικεφαλίδ
             free(rec);
         }
     }
-    if (i >= recordNum)
-        printf("Did not find hash value\n");
 
     if (!flag)
-        printf("Record key %s not found\n", (char*)value);
+        printf("Secondary record key %s not found\n", (char*)value);
 
     //closes file
-    if (BF_CloseFile(header_info.fileDesc) < 0)
+    if (BF_CloseFile(header_info_sht.fileDesc) < 0)
     {
         BF_PrintError("Error closing block file");
         return -1;
     }
 
-    return blkCnt;  //returns num of blocks read*/
-   return 8;
+    return blkCnt;  //returns num of blocks read
 }
 
 
-long SHT_HashFunction(int key, long buckets)  //hash function
+long SHT_HashFunction(char * key, long buckets)  //hash function
 {
-    return key % buckets; //modular using number of buckets
+    size_t hash = 0;
+    while (*key)
+        hash = (hash * 10) + *key++ - '0';
+
+    return hash % buckets;
 }
 
 
@@ -425,7 +437,7 @@ int HashStatistics(char * filename)         //prints hash file's statistics
             memcpy (&file_id, block, sizeof(char));
 
             //checks if opened file is heap file
-            if (file_id != 'T')
+            if (file_id != 'S')
             {
                 printf("File is not a hash file\n");
                 return -1;

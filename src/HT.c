@@ -474,8 +474,6 @@ int HT_GetAllEntries(HT_info header_info, void * value)         //searches for a
             free(rec);
         }
     }
-    if (i >= recordNum)
-        printf("Did not find hash value\n");
 
     if (!flag)
         printf("Record key %s not found\n", (char*)value);

@@ -18,7 +18,7 @@ int SHT_SecondaryInsertEntry( SHT_info header_info, /* επικεφαλίδα τ
 int SHT_SecondaryGetAllEntries( SHT_info header_info_sht, /* επικεφαλίδα του αρχείου δευτερεύοντος ευρετηρίου*/ HT_info header_info_ht,/*επικεφαλίδατουαρχείουπρωτεύοντοςευρετηρίου*/ void *value /* τιμή τουπεδίου-κλειδιού προς αναζήτηση */);
 int HashStatistics( char* filename /* όνομα του αρχείου που ενδιαφέρει */ );
 
-long SHT_HashFunction(int key, long buckets);
+long SHT_HashFunction(char * key, long buckets);
 
 
 #endif

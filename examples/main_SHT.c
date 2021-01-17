@@ -11,14 +11,14 @@
 #include "../include//SHT.h"
 
 #define MAX_RECORDS 1500
-#define FILENAMEHT "file_HT_1"
-#define FILENAMESHT "file_SHT_1"
+#define FILENAMEHT "fileHT1"
+#define FILENAMESHT "fileSHT1"
 
 
 int main(int argc, char** argv)
 {
-    char filenameHT [10];
-    char filenameSHT [11];
+    char filenameHT [8];
+    char filenameSHT [9];
 
     strcpy(filenameHT, FILENAMEHT);
     strcpy(filenameSHT, FILENAMESHT);
@@ -46,8 +46,8 @@ int main(int argc, char** argv)
         printf("Error in opening record file\n");
         exit(-1);
     }
-
     chdir("block_files");    //changes dir to create block files in their own dir
+
 
     /**creates and opens an empty ht file with its name as id**/
     printf("Creating HT file: %s\n", filenameHT);
@@ -85,8 +85,8 @@ int main(int argc, char** argv)
         if (count == MAX_RECORDS)
         {
             //creates and opens 2 new block files
-            filenameHT[9]++;
-            filenameSHT[9]++;
+            filenameHT[7]++;
+            filenameSHT[8]++;
 
             /** HT **/
             printf("Creating HT file: %s\n", filenameHT);
@@ -133,7 +133,7 @@ int main(int argc, char** argv)
     //picking a random primary-key that exists in all input files
     srand(time(NULL));
     int value = rand() % 1000;  //gets random int that exists in all datasets
-    char * key = malloc(10);
+    char * key = malloc(4);
     sprintf(key, "%d", value);
 
     /** searching HT files with primary key **/
@@ -151,31 +151,42 @@ int main(int argc, char** argv)
     }
 
     //building secondary key with the same value
-    char * sec_key = malloc(13);
+    char * sec_key = malloc(12);
     strcpy(sec_key, "surname_");
     strcat(sec_key, key);
 
-    //printf("\nSearching secondary key %s\n", sec_key);
+    printf("\nSearching secondary key %s\n", sec_key);
     SHtNode *sTemp = sht_files->head;
-    /*while (temp)
+    while (sTemp)
     {
         int blkCnt;
-        if ((blkCnt = SHT_SecondaryGetAllEntries(*temp->info, *temp->info., sec_key)) < 0)
+
+        //search for ht_info with this name
+        temp = ht_files->head;
+        while (temp)
+        {
+            if (strcmp(temp->info->attrName, sTemp->info->fileName) != 0)
+                break;
+            temp = temp->next;
+        }
+        if (!temp)
+            break;
+
+        if ((blkCnt = SHT_SecondaryGetAllEntries(*sTemp->info, *temp->info, sec_key)) < 0)
             printf("Searching secondary key failed\n");
         else
             printf("Read %d SHT blocks\n", blkCnt);
 
-        temp = temp->next;
-    }*/
+        sTemp = sTemp->next;
+    }
 
     //prints hash statistics for every SHT file
     sTemp = sht_files->head;
-    while (temp)
+    while (sTemp)
     {
-        if (HashStatistics(temp->info->attrName) < 0)
+        if (HashStatistics(sTemp->info->attrName) < 0)
             printf("Error in calculating hash statistics\n");
-
-        temp = temp->next;
+        sTemp = sTemp->next;
     }
 
     //closes and deletes all opened files
@@ -196,7 +207,7 @@ int main(int argc, char** argv)
         if (SHT_CloseSecondaryIndex(sTemp->info) < 0)
             exit(EXIT_FAILURE);
 
-        temp = temp->next;
+        sTemp = sTemp->next;
     }
 
     //frees all memory
@@ -207,6 +218,9 @@ int main(int argc, char** argv)
     free(record);
     free(secondaryRecord);
     free(ht_files);
+    free(key);
+    free(sec_key);
+    free(sht_files);
 
     printf("Exiting\n");
     return 0;

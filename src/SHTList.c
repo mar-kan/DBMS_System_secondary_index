@@ -1,14 +1,14 @@
 #include "../include/SHTList.h"
 
 
-int SListInsert(SHtList * list, SHT_info * hpInfo)
+int SListInsert(SHtList * list, SHT_info * info)
 {
     if (!list)
         list->head = malloc(sizeof(SHtList));
 
     //creates a list node with given HP_info
     SHtNode * node = malloc(sizeof(SHtNode));
-    node->info = hpInfo;
+    node->info = info;
     node->next = NULL;
     //adds new node at the beginning of the list for speed
     if (list->head)
