@@ -1,0 +1,1 @@
+/usr/bin/cc -g   CMakeFiles/2.dir/examples/main_SHT.c.o CMakeFiles/2.dir/src/HtList.c.o CMakeFiles/2.dir/src/HT.c.o CMakeFiles/2.dir/src/utilities.c.o CMakeFiles/2.dir/src/SHT.c.o CMakeFiles/2.dir/src/SHTList.c.o  -o 2  /lib/BF_64.a 
