@@ -3,7 +3,10 @@
 int ListInsert(HtList * list, HT_info * hpInfo)
 {
     if (!list)
-        list->head = malloc(sizeof(HtList));
+    {
+        list = malloc(sizeof(HtList));
+        list->head = malloc(sizeof(HtNode));
+    }
 
     //creates a list node with given HP_info
     HtNode * node = malloc(sizeof(HtNode));

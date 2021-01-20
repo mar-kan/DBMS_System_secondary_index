@@ -54,7 +54,7 @@ int main(int argc, char** argv)
     if (HT_CreateIndex(filenameHT, 'i', filenameHT, sizeof(filenameHT), 50) < 0)
         exit(EXIT_FAILURE);
 
-    printf("Opening HT file\n");
+    printf("Opening HT file\n\n");
     HT_info * info_ht;
     if (!(info_ht = HT_OpenIndex(filenameHT)))
         exit(EXIT_FAILURE);
@@ -65,7 +65,7 @@ int main(int argc, char** argv)
     if (SHT_CreateSecondaryIndex(filenameSHT, filenameSHT, sizeof(filenameSHT), 50, filenameHT) < 0)
         exit(EXIT_FAILURE);
 
-    printf("Opening SHT file\n");
+    printf("Opening SHT file\n\n");
     SHT_info * info_sht;
     if (!(info_sht = SHT_OpenSecondaryIndex(filenameSHT)))
         exit(EXIT_FAILURE);
@@ -93,7 +93,7 @@ int main(int argc, char** argv)
             if (HT_CreateIndex(filenameHT, 'i', filenameHT, sizeof(filenameHT), 50) < 0)
                 exit(EXIT_FAILURE);
 
-            printf("Opening HT file\n");
+            printf("Opening HT file\n\n");
             if (!(info_ht = HT_OpenIndex(filenameHT)))
                 exit(EXIT_FAILURE);
             ListInsert(ht_files, info_ht);    //inserts info in list
@@ -103,7 +103,7 @@ int main(int argc, char** argv)
             if (SHT_CreateSecondaryIndex(filenameSHT, filenameSHT, sizeof(filenameSHT), 50, filenameHT) < 0)
                 exit(EXIT_FAILURE);
 
-            printf("Opening SHT file\n");
+            printf("Opening SHT file\n\n");
             if (!(info_sht = SHT_OpenSecondaryIndex(filenameSHT)))
                 exit(EXIT_FAILURE);
             SListInsert(sht_files, info_sht);    //inserts info in list
@@ -204,6 +204,9 @@ int main(int argc, char** argv)
     sTemp = sht_files->head;
     while (sTemp)
     {
+        if (!sTemp->info->fileDesc)
+            break;
+
         if (SHT_CloseSecondaryIndex(sTemp->info) < 0)
             exit(EXIT_FAILURE);
 

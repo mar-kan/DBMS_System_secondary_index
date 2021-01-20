@@ -97,7 +97,7 @@ SHT_info * SHT_OpenSecondaryIndex(char *sfileName /* όνομα αρχείου *
 
     //creates file's HT_info
     SHT_info * info = malloc(sizeof(SHT_info));
-    info->attrName = (char*)malloc(sizeof(sfileName));
+
     info->fileDesc = fd;
     info->attrName = sfileName;
     info->attrLength = sizeof (sfileName);
@@ -132,6 +132,7 @@ int SHT_CloseSecondaryIndex(SHT_info* header_info)
 
     //frees SHT_info memory
     free(header_info->fileName);
+    free(header_info->attrName);
     free(header_info);
     return 0;
 }
@@ -218,7 +219,7 @@ int SHT_SecondaryInsertEntry(SHT_info header_info, /* επικεφαλίδα τ�
 
             //sets values for new block
             recordNum = 0;
-            block_hash_num = hash_value;
+            block_hash_num = (int)hash_value;
 
             //reads newly allocated block
             if (BF_ReadBlock(header_info.fileDesc, blkCnt, &block) < 0)
@@ -229,7 +230,7 @@ int SHT_SecondaryInsertEntry(SHT_info header_info, /* επικεφαλίδα τ�
         }
 
         //checks if there is enough space for the new record
-        if (sizeof(int)*2 + recordNum*sizeof(Record) + sizeof(record) > BLOCK_SIZE)   //no space
+        if (sizeof(int)*2 + recordNum*sizeof(SecondaryRecord) + sizeof(SecondaryRecord) > BLOCK_SIZE)   //no space
         {
             //allocates a new block
             if (BF_AllocateBlock(header_info.fileDesc) < 0)
@@ -242,10 +243,10 @@ int SHT_SecondaryInsertEntry(SHT_info header_info, /* επικεφαλίδα τ�
 
             //sets values for new block
             recordNum=0;
-            block_hash_num = hash_value;
+            block_hash_num = (int)hash_value;
 
             //passes new block's number at the end of this block
-            memcpy(block+sizeof(int)*2 + recordNum*sizeof(Record), &blkCnt, sizeof(int));
+            memcpy(block+sizeof(int)*2 + recordNum*sizeof(SecondaryRecord), &blkCnt, sizeof(int));
             if (BF_WriteBlock(header_info.fileDesc, i) < 0)
             {
                 BF_PrintError("Error writing block");
@@ -270,7 +271,7 @@ int SHT_SecondaryInsertEntry(SHT_info header_info, /* επικεφαλίδα τ�
     memcpy(block+sizeof(int), &recordNum, sizeof(int));
 
     //inserts record at the end of the block
-    memcpy(block+sizeof(int)*2+ sizeof(void*)+recordNum*sizeof(Record), &record, sizeof(Record));
+    memcpy(block+sizeof(int)*2+ sizeof(void*)+recordNum*sizeof(SecondaryRecord), &record, sizeof(SecondaryRecord));
 
     //writes block to block file
     if (BF_WriteBlock(header_info.fileDesc, i) < 0)
@@ -352,21 +353,20 @@ int SHT_SecondaryGetAllEntries(SHT_info header_info_sht, /* επικεφαλίδ
         //checks each record
         for (j=0; j<=recordNum; j++)
         {
-            //gets current record and compares its key to value
-            Record * rec = malloc(sizeof(Record));
-            memcpy(rec, block+sizeof(int)*2 + j*sizeof(Record), sizeof(Record));
+            //gets current secondary record and compares its key to value
+            SecondaryRecord * rec = malloc(sizeof(SecondaryRecord));
+            memcpy(rec, block+sizeof(int)*2 + j*sizeof(SecondaryRecord), sizeof(SecondaryRecord));
 
             //converts record id to string
             char * id = (char*)malloc(sizeof(int));
-            sprintf(id, "%d", rec->id);
 
-            if (strcmp(id, (char*)value) == 0)  //record found
+            if (strcmp(rec->record.surname, (char*)value) == 0)  //secondary record found
             {
                 //prints record
                 printf("Found Record with secondary key: %s\n"
                        "ID: %d\n"
                        "Full name: %s %s\n"
-                       "Address: %s\n", (char*)value, rec->id, rec->name, rec->surname, rec->address);
+                       "Address: %s\n", (char*)value, rec->record.id, rec->record.name, rec->record.surname, rec->record.address);
 
                 flag = 1;
             }
@@ -395,7 +395,7 @@ long SHT_HashFunction(char * key, long buckets)  //hash function
     while (*key)
         hash = (hash * 10) + *key++ - '0';
 
-    return hash % buckets;
+    return (long)hash % buckets;
 }
 
 

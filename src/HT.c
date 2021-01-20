@@ -205,7 +205,7 @@ int HT_InsertEntry( HT_info header_info, /* επικεφαλίδα του αρχ
 
             //sets values for new block
             recordNum = 0;
-            block_hash_num = hash_value;
+            block_hash_num = (int)hash_value;
 
             //reads newly allocated block
             if (BF_ReadBlock(header_info.fileDesc, blkCnt, &block) < 0)
@@ -216,7 +216,7 @@ int HT_InsertEntry( HT_info header_info, /* επικεφαλίδα του αρχ
         }
 
         //checks if there is enough space for the new record
-        if (sizeof(int)*2 + recordNum*sizeof(Record) + sizeof(record) > BLOCK_SIZE)   //no space
+        if (sizeof(int)*2 + recordNum*sizeof(Record) + sizeof(Record) > BLOCK_SIZE)   //no space
         {
             //allocates a new block
             if (BF_AllocateBlock(header_info.fileDesc) < 0)
@@ -229,7 +229,7 @@ int HT_InsertEntry( HT_info header_info, /* επικεφαλίδα του αρχ
 
             //sets values for new block
             recordNum=0;
-            block_hash_num = hash_value;
+            block_hash_num = (int)hash_value;
 
             //passes new block's number at the end of this block
             memcpy(block+sizeof(int)*2 + recordNum*sizeof(Record), &blkCnt, sizeof(int));
@@ -294,7 +294,7 @@ int HT_DeleteEntry(HT_info header_info, void * value)       //searches file for 
     }
 
     //calculates value's hash value
-    int hash_num = HT_HashFunction(atoi((char*)value), header_info.numBuckets);
+    long hash_num = HT_HashFunction(atoi((char*)value), header_info.numBuckets);
 
     //gets block count
     if((blkCnt = BF_GetBlockCounter(header_info.fileDesc)) < 0)
@@ -375,9 +375,6 @@ int HT_DeleteEntry(HT_info header_info, void * value)       //searches file for 
             free(rec);
         }
     }
-    if (i == recordNum)
-        printf("Did not find hash value\n");
-
     //closes file
     if (BF_CloseFile(header_info.fileDesc) < 0)
     {

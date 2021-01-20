@@ -4,7 +4,10 @@
 int SListInsert(SHtList * list, SHT_info * info)
 {
     if (!list)
+    {
+        list = malloc(sizeof(SHtList));
         list->head = malloc(sizeof(SHtList));
+    }
 
     //creates a list node with given HP_info
     SHtNode * node = malloc(sizeof(SHtNode));
