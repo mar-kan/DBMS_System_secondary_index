@@ -85,20 +85,21 @@ HT_info* HT_OpenIndex(char *fileName /* όνομα αρχείου */ )
         return NULL;
     }
 
-    //creates file's HT_info
-    HT_info * info = malloc(sizeof(HT_info));
-    info->fileDesc = fd;
-    info->attrName = fileName;
-    info->attrType = 'c';
-    info->attrLength = sizeof (fileName);
-    info->numBuckets = buckets;   //keeps max num of buckets of file
-
     //closes file
     if (BF_CloseFile(fd) < 0)
     {
         BF_PrintError("Error closing block file");
         return NULL;
     }
+
+    //creates file's HT_info
+    HT_info * info = malloc(sizeof(HT_info));
+    info->fileDesc = fd;
+    info->attrName = (char*)malloc(sizeof(fileName));
+    strcpy(info->attrName, fileName);
+    info->attrType = 'c';
+    info->attrLength = sizeof(fileName);
+    info->numBuckets = buckets;   //keeps max num of buckets of file
 
     return info;
 }
@@ -119,6 +120,7 @@ int HT_CloseIndex( HT_info* header_info )
     }
 
     //frees HT_info memory
+    free(header_info->attrName);
     free(header_info);
     return 0;
 }

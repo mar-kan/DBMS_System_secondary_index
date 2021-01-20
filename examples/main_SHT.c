@@ -180,12 +180,21 @@ int main(int argc, char** argv)
         sTemp = sTemp->next;
     }
 
+    //prints hash statistics for every HT file
+    temp = ht_files->head;
+    while (temp)
+    {
+        if (HashStatistics(temp->info->attrName) < 0)
+            printf("Error in calculating HT statistics\n");
+        temp = temp->next;
+    }
+
     //prints hash statistics for every SHT file
     sTemp = sht_files->head;
     while (sTemp)
     {
         if (HashStatistics(sTemp->info->attrName) < 0)
-            printf("Error in calculating hash statistics\n");
+            printf("Error in calculating SHT statistics\n");
         sTemp = sTemp->next;
     }
 

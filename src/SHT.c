@@ -94,22 +94,23 @@ SHT_info * SHT_OpenSecondaryIndex(char *sfileName /* όνομα αρχείου *
     char * filename = (char*)malloc(filename_size);
     memcpy(filename, block+sizeof(char)+sizeof(int)*2, filename_size);
 
-
-    //creates file's HT_info
-    SHT_info * info = malloc(sizeof(SHT_info));
-
-    info->fileDesc = fd;
-    info->attrName = sfileName;
-    info->attrLength = sizeof (sfileName);
-    info->numBuckets = buckets;   //keeps max num of buckets of file
-    info->fileName = filename;
-
     //closes file
     if (BF_CloseFile(fd) < 0)
     {
         BF_PrintError("Error closing block file");
         return NULL;
     }
+
+    //creates file's HT_info
+    SHT_info * info = malloc(sizeof(SHT_info));
+
+    info->fileDesc = fd;
+    info->attrName = (char*)malloc(sizeof(sfileName));
+    strcpy(info->attrName, sfileName);
+    info->attrLength = sizeof (sfileName);
+    info->numBuckets = buckets;   //keeps max num of buckets of file
+    info->fileName = (char*)malloc(sizeof(filename));
+    strcpy(info->fileName, filename);
 
     free(filename);
     return info;
