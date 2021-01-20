@@ -272,7 +272,7 @@ int SHT_SecondaryInsertEntry(SHT_info header_info, /* επικεφαλίδα τ�
     memcpy(block+sizeof(int), &recordNum, sizeof(int));
 
     //inserts record at the end of the block
-    memcpy(block+sizeof(int)*2+ sizeof(void*)+recordNum*sizeof(SecondaryRecord), &record, sizeof(SecondaryRecord));
+    memcpy(block+sizeof(int)*2+recordNum*sizeof(SecondaryRecord), &record, sizeof(SecondaryRecord));
 
     //writes block to block file
     if (BF_WriteBlock(header_info.fileDesc, i) < 0)
@@ -301,7 +301,7 @@ int SHT_SecondaryGetAllEntries(SHT_info header_info_sht, /* επικεφαλίδ
     int flag = 0;
 
     //opens requested file
-    if ((BF_OpenFile(header_info_sht.fileName)) < 0)
+    if ((BF_OpenFile(header_info_sht.attrName)) < 0)
     {
         BF_PrintError("Error opening block file");
         return -1;
@@ -336,7 +336,7 @@ int SHT_SecondaryGetAllEntries(SHT_info header_info_sht, /* επικεφαλίδ
             //checks if opened file is hash file
             if (file_id != 'S')
             {
-                printf("File %s is not an SHT file\n", header_info_sht.fileName);
+                printf("File %s is not an SHT file\n", header_info_sht.attrName);
                 return -1;
             }
             continue;
@@ -349,7 +349,7 @@ int SHT_SecondaryGetAllEntries(SHT_info header_info_sht, /* επικεφαλίδ
             continue;   //skip
 
         //gets block's record num
-        memcpy (&recordNum, block, sizeof(int));
+        memcpy (&recordNum, block+sizeof(int), sizeof(int));
 
         //checks each record
         for (j=0; j<=recordNum; j++)
@@ -361,7 +361,7 @@ int SHT_SecondaryGetAllEntries(SHT_info header_info_sht, /* επικεφαλίδ
             //converts record id to string
             char * id = (char*)malloc(sizeof(int));
 
-            ///if (strcmp(rec->record.surname, (char*)value) == 0)  //secondary record found
+            if (strcmp(rec->record.surname, (char*)value) == 0)  //secondary record found
             {
                 //prints record
                 printf("Found Record with secondary key: %s\n"
@@ -437,8 +437,8 @@ int HashStatistics(char * filename)         //prints hash file's statistics
         {
             memcpy (&file_id, block, sizeof(char));
 
-            //checks if opened file is heap file
-            if (file_id != 'S')
+            //checks if opened file is HT or SHT file
+            if (file_id != 'S' && file_id != 'T')
             {
                 printf("File is not a hash file\n");
                 return -1;

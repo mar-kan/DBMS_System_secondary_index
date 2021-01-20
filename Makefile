@@ -32,4 +32,4 @@ move:
 	mv SHT ./build/
 
 clean:
-	rm *.o SHT ###bin/* build/* sht_files/* ht_files/* ##########
+	rm *.o SHT block_files/* ###bin/* build/* ##########

@@ -126,7 +126,6 @@ int main(int argc, char** argv)
             printf("Insertion in SHT failed\n");
             break;
         }
-
         count++;
     }
 
@@ -213,9 +212,6 @@ int main(int argc, char** argv)
     sTemp = sht_files->head;
     while (sTemp)
     {
-        if (!sTemp->info->fileDesc)
-            break;
-
         if (SHT_CloseSecondaryIndex(sTemp->info) < 0)
             exit(EXIT_FAILURE);
 

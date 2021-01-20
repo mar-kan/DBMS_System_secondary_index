@@ -259,7 +259,7 @@ int HT_InsertEntry( HT_info header_info, /* επικεφαλίδα του αρχ
     memcpy(block+sizeof(int), &recordNum, sizeof(int));
 
     //inserts record at the end of the block
-    memcpy(block+sizeof(int)*2+ sizeof(void*)+recordNum*sizeof(Record), &record, sizeof(Record));
+    memcpy(block+sizeof(int)*2+recordNum*sizeof(Record), &record, sizeof(Record));
 
     //writes block to block file
     if (BF_WriteBlock(header_info.fileDesc, i) < 0)
