@@ -447,14 +447,14 @@ int HashStatistics(char * filename)         //prints hash file's statistics
         }
 
         //gets num of records
-        memcpy (&recordNum, block, sizeof(int));
+        memcpy (&recordNum, block+sizeof(int), sizeof(int));
 
         //updates statistics if necessary
         if (recordNum < min)
             min = recordNum;
         if (recordNum > max)
             max = recordNum;
-        sum++;
+        sum += recordNum;
     }
     //closes file
     if (BF_CloseFile(fd) < 0)
@@ -465,7 +465,7 @@ int HashStatistics(char * filename)         //prints hash file's statistics
 
     printf("\nHash statistics for file %s:\n", filename);
     printf("File has %d blocks\n", blkCnt);
-    printf("Records per bucket:\n Minimum: %d\n Maximum: %d\n Average: %d\n", min, max, sum /blkCnt);
+    printf("Records per bucket:\n Minimum: %d\n Maximum: %d\n Average: %d\n", min, max, sum / blkCnt);
     printf("Buckets with overflow: %d\n", overflow_sum);
 
     return 0;
