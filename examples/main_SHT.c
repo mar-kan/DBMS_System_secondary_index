@@ -133,7 +133,7 @@ int main(int argc, char** argv)
     //picking a random primary-key that exists in all input files
     srand(time(NULL));
     int value = rand() % 1000;  //gets random int that exists in all datasets
-    char * key = malloc(4);
+    char * key = (char*)malloc(4);
     sprintf(key, "%d", value);
 
     /** searching HT files with primary key **/
@@ -151,7 +151,7 @@ int main(int argc, char** argv)
     }
 
     //building secondary key with the same value
-    char * sec_key = malloc(12);
+    char * sec_key = (char*)malloc(12);
     strcpy(sec_key, "surname_");
     strcat(sec_key, key);
 

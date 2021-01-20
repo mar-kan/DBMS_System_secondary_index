@@ -301,7 +301,7 @@ int SHT_SecondaryGetAllEntries(SHT_info header_info_sht, /* επικεφαλίδ
     int flag = 0;
 
     //opens requested file
-    if ((BF_OpenFile(header_info_sht.attrName)) < 0)
+    if ((BF_OpenFile(header_info_sht.fileName)) < 0)
     {
         BF_PrintError("Error opening block file");
         return -1;
@@ -336,7 +336,7 @@ int SHT_SecondaryGetAllEntries(SHT_info header_info_sht, /* επικεφαλίδ
             //checks if opened file is hash file
             if (file_id != 'S')
             {
-                printf("File is not a hash file\n");
+                printf("File %s is not an SHT file\n", header_info_sht.fileName);
                 return -1;
             }
             continue;
@@ -361,7 +361,7 @@ int SHT_SecondaryGetAllEntries(SHT_info header_info_sht, /* επικεφαλίδ
             //converts record id to string
             char * id = (char*)malloc(sizeof(int));
 
-            if (strcmp(rec->record.surname, (char*)value) == 0)  //secondary record found
+            ///if (strcmp(rec->record.surname, (char*)value) == 0)  //secondary record found
             {
                 //prints record
                 printf("Found Record with secondary key: %s\n"
