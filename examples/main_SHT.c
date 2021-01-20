@@ -85,8 +85,8 @@ int main(int argc, char** argv)
         if (count == MAX_RECORDS)
         {
             //creates and opens 2 new block files
-            filenameHT[7]++;
-            filenameSHT[8]++;
+            filenameHT[6]++;
+            filenameSHT[7]++;
 
             /** HT **/
             printf("Creating HT file: %s\n", filenameHT);
