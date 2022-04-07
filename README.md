@@ -1,4 +1,4 @@
-# DBMS-2
+# DBMS_System_secondary_index
 ---------------------------
 
 A database management system that stores records of people in block files.
